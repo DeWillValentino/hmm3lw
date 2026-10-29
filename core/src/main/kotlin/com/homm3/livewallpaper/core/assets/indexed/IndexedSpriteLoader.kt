@@ -150,6 +150,15 @@ class IndexedSpriteLoader {
             val filenames = def.groups.first { group -> frame.frameName in group.filenames }.filenames
             builder.packObjectFrame(defName, frame, filenames, paletteIndex)
         }
+
+        // Multi-group DEFs (heroes and their flags: one group per facing) also get one region list per group,
+        // named "<def>@<group type>", pointing at the frames packed above.
+        if (def.groups.size > 1) {
+            val framesByName = def.groups.flatMap { it.frames }.associateBy { it.frameName }
+            def.groups.forEach { group ->
+                builder.addGroupRegions(defName, group.groupType, group.filenames, framesByName, paletteIndex)
+            }
+        }
     }
 
     private fun packTiles(decoded: Decoded.Tiles, builder: BundleBuilder) {
@@ -266,6 +275,33 @@ private class BundleBuilder {
             IndexedRegionInfo(
                 packerName = packerName,
                 regionName = defNameNoExt,
+                regionIndex = position,
+                width = frame.width,
+                height = frame.height,
+                fullWidth = frame.fullWidth,
+                fullHeight = frame.fullHeight,
+                x = frame.x,
+                y = frame.y,
+                isTerrain = false,
+                paletteIndex = paletteIndex,
+            )
+        }
+    }
+
+    /** Regions "<def>@<groupType>" for the frames of one group, already packed by [packObjectFrame]. */
+    fun addGroupRegions(
+        defName: String,
+        groupType: Int,
+        filenames: List<String>,
+        framesByName: Map<String, DefFrame>,
+        paletteIndex: Int,
+    ) {
+        val defNameNoExt = defName.removeSuffix(DEF_EXTENSION)
+        filenames.forEachIndexed { position, frameName ->
+            val frame = framesByName[frameName] ?: return@forEachIndexed
+            regions += IndexedRegionInfo(
+                packerName = "$defName/$frameName",
+                regionName = "$defNameNoExt@$groupType",
                 regionIndex = position,
                 width = frame.width,
                 height = frame.height,

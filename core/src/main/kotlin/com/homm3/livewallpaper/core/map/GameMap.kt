@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Rectangle
 import com.homm3.livewallpaper.core.GameConfig
 import com.homm3.livewallpaper.core.assets.SpriteSet
 import com.homm3.livewallpaper.core.map.layers.BorderLayer
+import com.homm3.livewallpaper.core.map.layers.HeroesLayer
 import com.homm3.livewallpaper.core.map.layers.ObjectsLayer
 import com.homm3.livewallpaper.core.map.layers.TerrainLayer
 import com.homm3.livewallpaper.parser.h3m.H3mMap
@@ -24,7 +25,23 @@ class GameMap(
     val mapSize = h3m.header.size
     private val objectsLayer by lazy(LazyThreadSafetyMode.NONE) { ObjectsLayer(spriteSet, h3m, isUnderground) }
 
+    private val heroesLayer by lazy(LazyThreadSafetyMode.NONE) { HeroesLayer(spriteSet, h3m, isUnderground, objectsLayer) }
+
     val tiledMap: TiledMap by lazy(LazyThreadSafetyMode.NONE) { buildTiledMap() }
+
+    /** Whether a hero is walking; the screen renders more often while one is. */
+    val isAnyHeroWalking: Boolean get() = heroesLayer.isAnyWalking
+
+    /** Spawns fresh wandering heroes around the view at the camera position, or removes them when [enabled] is false. */
+    fun resetHeroes(enabled: Boolean, cameraX: Float, cameraY: Float, viewportW: Float, viewportH: Float) {
+        if (enabled) {
+            heroesLayer.respawn(viewBounds(cameraX, cameraY, viewportW, viewportH))
+        } else {
+            heroesLayer.clear()
+        }
+    }
+
+    fun updateHeroes(deltaSeconds: Float) = heroesLayer.update(deltaSeconds)
 
     fun objectCoverage(cameraX: Float, cameraY: Float, viewportW: Float, viewportH: Float): Float {
         return objectsLayer.objectCoverage(viewBounds(cameraX, cameraY, viewportW, viewportH))
@@ -48,6 +65,7 @@ class GameMap(
         val map = TiledMap().apply {
             layers.add(TerrainLayer(spriteSet, h3m, isUnderground))
             layers.add(objectsLayer)
+            layers.add(heroesLayer)
             layers.add(BorderLayer(spriteSet, mapSize, GameConfig.BORDER_TILE_COUNT, GameConfig.BORDER_TILE_COUNT))
         }
         log.info { "Built '$fileName' (underground=$isUnderground) in ${System.currentTimeMillis() - buildStart}ms" }

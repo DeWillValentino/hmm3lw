@@ -66,6 +66,7 @@ fun SettingsRoute(onOpenMaps: () -> Unit, onOpenAssetSetup: () -> Unit, onOpenLi
         onMapUpdateIntervalSelected = viewModel::setMapUpdateInterval,
         onUseScrollChanged = viewModel::setUseScroll,
         onBrightnessChanged = viewModel::setBrightness,
+        onWanderingHeroesChanged = viewModel::setWanderingHeroes,
         onOpenMaps = onOpenMaps,
         onOpenAssetSetup = onOpenAssetSetup,
         onOpenLinks = onOpenLinks,
@@ -85,6 +86,7 @@ fun SettingsScreen(
     onMapUpdateIntervalSelected: (MapUpdateInterval) -> Unit,
     onUseScrollChanged: (Boolean) -> Unit,
     onBrightnessChanged: (Float) -> Unit,
+    onWanderingHeroesChanged: (Boolean) -> Unit,
     onOpenMaps: () -> Unit,
     onOpenAssetSetup: () -> Unit,
     onOpenLinks: () -> Unit,
@@ -128,6 +130,7 @@ fun SettingsScreen(
                     onMapUpdateIntervalSelected = onMapUpdateIntervalSelected,
                     onUseScrollChanged = onUseScrollChanged,
                     onBrightnessChanged = onBrightnessChanged,
+                    onWanderingHeroesChanged = onWanderingHeroesChanged,
                 )
             }
             contentSection(onOpenMaps = onOpenMaps, onOpenAssetSetup = onOpenAssetSetup, onOpenLinks = onOpenLinks)
@@ -141,6 +144,7 @@ private fun LazyListScope.wallpaperSection(
     onMapUpdateIntervalSelected: (MapUpdateInterval) -> Unit,
     onUseScrollChanged: (Boolean) -> Unit,
     onBrightnessChanged: (Float) -> Unit,
+    onWanderingHeroesChanged: (Boolean) -> Unit,
 ) {
     item { PreferenceCategory(stringResource(R.string.settings_section_wallpaper)) }
     item {
@@ -165,6 +169,14 @@ private fun LazyListScope.wallpaperSection(
             summary = stringResource(R.string.use_scroll_summary),
             checked = preferences.useScroll,
             onCheckedChange = onUseScrollChanged,
+        )
+    }
+    item {
+        SwitchPreference(
+            title = stringResource(R.string.wandering_heroes_title),
+            summary = stringResource(R.string.wandering_heroes_summary),
+            checked = preferences.wanderingHeroes,
+            onCheckedChange = onWanderingHeroesChanged,
         )
     }
     item {
@@ -247,6 +259,7 @@ private fun SettingsScreenPreview() {
             onMapUpdateIntervalSelected = {},
             onUseScrollChanged = {},
             onBrightnessChanged = {},
+            onWanderingHeroesChanged = {},
             onOpenMaps = {},
             onOpenAssetSetup = {},
             onOpenLinks = {},

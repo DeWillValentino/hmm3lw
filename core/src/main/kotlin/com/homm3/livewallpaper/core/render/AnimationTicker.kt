@@ -19,7 +19,11 @@ import kotlin.time.Duration.Companion.seconds
  * Ticks run on [Dispatchers.Default]: KtxAsync/libGDX timers are driven by frames and would never fire.
  * [start] and [stop] are meant for the rendering thread.
  */
-class AnimationTicker(private val interval: Duration = GameConfig.FRAME_TIME.toDouble().seconds) {
+class AnimationTicker(
+    private val interval: Duration = GameConfig.FRAME_TIME.toDouble().seconds,
+    /** False for a ticker that only requests frames, e.g. for smooth hero walking, leaving sprite animation pace alone. */
+    private val advancesClock: Boolean = true,
+) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var tickJob: Job? = null
 
@@ -31,12 +35,14 @@ class AnimationTicker(private val interval: Duration = GameConfig.FRAME_TIME.toD
         if (tickJob?.isActive == true) return
         tickJob = scope.launch {
             while (isActive) {
-                AnimationClock.advance()
+                if (advancesClock) AnimationClock.advance()
                 Gdx.graphics.requestRendering()
                 delay(interval)
             }
         }
     }
+
+    val isRunning: Boolean get() = tickJob?.isActive == true
 
     fun stop() {
         tickJob?.cancel()

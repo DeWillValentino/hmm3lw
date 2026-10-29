@@ -3,6 +3,7 @@ package com.homm3.livewallpaper.core.library
 import com.badlogic.gdx.utils.Disposable
 import com.homm3.livewallpaper.core.assets.GameDataLocator
 import com.homm3.livewallpaper.core.assets.MapDefListStore
+import com.homm3.livewallpaper.core.heroes.HeroDefs
 import com.homm3.livewallpaper.core.assets.MapValidity
 import com.homm3.livewallpaper.core.assets.SpriteSet
 import com.homm3.livewallpaper.core.map.GameMap
@@ -103,7 +104,7 @@ class MapLibrary(
     }
 
     private suspend fun loadCandidateDefs(target: SpriteSet) {
-        target.loadDefs(defListStore.update(candidateFiles, target.hasHotaAssets).defNames)
+        target.loadDefs(defListStore.update(candidateFiles, target.hasHotaAssets).defNames + HeroDefs.allDefNames)
     }
 
     private suspend fun loadEntry(fileName: String): MapEntry? {

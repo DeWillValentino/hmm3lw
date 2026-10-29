@@ -17,22 +17,30 @@ import com.homm3.livewallpaper.parser.h3m.H3mObjectType
 
 class ObjectsLayer(assets: SpriteSet, h3m: H3mMap, isUnderground: Boolean) : MapLayer() {
     private val randomizer = ObjectsRandomizer(hasHotaAssets = assets.hasHotaAssets)
-    private val sprites = h3m
+
+    /** This level's objects in drawing order; an object's index here is its id for [setHidden]. */
+    val levelObjects: List<H3mObject> = h3m
         .objects
         .sorted()
         .filter { it.z == if (isUnderground) 1 else 0 }
+
+    private val sprites = levelObjects
         .map { obj ->
             val frames = assets.getObjectFrames(randomizer.resolveSpriteName(obj))
             MapSprite(obj, frames, anchorShiftTiles(obj, frames))
         }
 
-    private val spritesIndices: Map<Int, Map<Int, List<Int>>> = buildSpatialIndex(h3m, isUnderground)
+    private val spritesIndices: Map<Int, Map<Int, List<Int>>> = buildSpatialIndex(levelObjects)
+
+    /** Objects taken off the map by wandering heroes; they come back with [showAll]. */
+    private val hidden = BooleanArray(sprites.size)
 
     private var lastStartX = Int.MIN_VALUE
     private var lastStartY = Int.MIN_VALUE
     private var lastEndX = Int.MIN_VALUE
     private var lastEndY = Int.MIN_VALUE
     private val visibleSprites = mutableListOf<MapSprite>()
+    private val visibleIds = mutableListOf<Int>()
 
     init {
         name = "objects"
@@ -46,8 +54,14 @@ class ObjectsLayer(assets: SpriteSet, h3m: H3mMap, isUnderground: Boolean) : Map
 
     fun render(renderer: BatchTiledMapRenderer) {
         updateVisibleObjects(renderer.viewBounds)
-        visibleSprites.forEach { it.render(renderer) }
+        visibleIds.forEach { id -> if (!hidden[id]) sprites[id].render(renderer) }
     }
+
+    fun setHidden(id: Int, isHidden: Boolean) {
+        if (id in hidden.indices) hidden[id] = isHidden
+    }
+
+    fun showAll() = hidden.fill(false)
 
     fun objectCoverage(viewBounds: Rectangle): Float {
         updateVisibleObjects(viewBounds)
@@ -88,7 +102,8 @@ class ObjectsLayer(assets: SpriteSet, h3m: H3mMap, isUnderground: Boolean) : Map
         }
 
         visibleSprites.clear()
-        val visibleIndices = mutableListOf<Int>()
+        visibleIds.clear()
+        val visibleIndices = visibleIds
         for (y in startY..endY) {
             val column = spritesIndices[y] ?: continue
             for (x in startX..endX) {
@@ -105,11 +120,9 @@ class ObjectsLayer(assets: SpriteSet, h3m: H3mMap, isUnderground: Boolean) : Map
         lastEndY = endY
     }
 
-    private fun buildSpatialIndex(h3m: H3mMap, isUnderground: Boolean): Map<Int, Map<Int, List<Int>>> {
+    private fun buildSpatialIndex(objects: List<H3mObject>): Map<Int, Map<Int, List<Int>>> {
         val index = mutableMapOf<Int, MutableMap<Int, MutableList<Int>>>()
-        h3m.objects
-            .sorted()
-            .filter { it.z == if (isUnderground) 1 else 0 }
+        objects
             .forEachIndexed { i, obj ->
                 index
                     .getOrPut(obj.y) { mutableMapOf() }
@@ -119,7 +132,7 @@ class ObjectsLayer(assets: SpriteSet, h3m: H3mMap, isUnderground: Boolean) : Map
         return index
     }
 
-    private companion object {
+    companion object {
         val MONSTER_TYPES = setOf(
             H3mObjectType.MONSTER,
             H3mObjectType.RANDOM_MONSTER,

@@ -26,6 +26,8 @@ class SettingsViewModel(private val repository: WallpaperPreferencesRepository) 
 
     fun setBrightness(brightness: Float) = launchUpdate { repository.setBrightness(brightness) }
 
+    fun setWanderingHeroes(enabled: Boolean) = launchUpdate { repository.setWanderingHeroes(enabled) }
+
     private fun launchUpdate(update: suspend () -> Unit) {
         viewModelScope.launch { update() }
     }

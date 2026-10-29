@@ -9,6 +9,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.homm3.livewallpaper.core.WallpaperPreferences
 import com.homm3.livewallpaper.core.assets.indexed.PaletteColor
 import com.homm3.livewallpaper.core.assets.indexed.PaletteRegion
+import com.homm3.livewallpaper.core.map.layers.HeroesLayer
 import com.homm3.livewallpaper.core.map.layers.ObjectsLayer
 
 /**
@@ -40,7 +41,10 @@ class PaletteTiledMapRenderer(
     }
 
     override fun renderObjects(layer: MapLayer?) {
-        if (layer is ObjectsLayer) layer.render(this)
+        when (layer) {
+            is ObjectsLayer -> layer.render(this)
+            is HeroesLayer -> layer.render(this)
+        }
     }
 
     /** Copy of libGDX 1.14.0 OrthogonalTiledMapRenderer.renderTileLayer; only the vertex colour differs. */

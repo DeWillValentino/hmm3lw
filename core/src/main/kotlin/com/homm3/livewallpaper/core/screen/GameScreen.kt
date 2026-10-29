@@ -35,6 +35,7 @@ import ktx.log.logger
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
+import kotlin.time.Duration.Companion.seconds
 
 /** Shows one [GameMap] at a time out of the maps handed to [setMaps]. */
 class GameScreen(
@@ -50,6 +51,10 @@ class GameScreen(
     private val emptyTiledMap = TiledMap()
     private val renderer = PaletteTiledMapRenderer(emptyTiledMap, spriteBatch)
     private val animationTicker = AnimationTicker()
+
+    /** Extra frames while a hero walks, so steps look smooth; sprite animations keep their own pace. */
+    private val heroTicker = AnimationTicker(HERO_FRAME_TIME.toDouble().seconds, advancesClock = false)
+    private var heroesEnabled = WallpaperPreferences.defaultWanderingHeroes
     private val inputProcessor = CameraInputProcessor(viewport).apply {
         onEnter = { randomizeVisibleMapPart(force = true) }
     }
@@ -127,6 +132,10 @@ class GameScreen(
                 renderer.brightness = it.brightness
                 setUnitsPerPixelByScale(it.scale)
                 setMapUpdateInterval(it.mapUpdateInterval)
+                if (it.wanderingHeroes != heroesEnabled) {
+                    heroesEnabled = it.wanderingHeroes
+                    resetHeroes()
+                }
                 Gdx.graphics.requestRendering()
             }
         }
@@ -135,6 +144,7 @@ class GameScreen(
 
     override fun pause() {
         animationTicker.stop()
+        heroTicker.stop()
     }
 
     override fun resume() {
@@ -151,6 +161,7 @@ class GameScreen(
         if (currentMap == null) return
         AnimationClock.beginFrame()
         camera.update()
+        updateHeroes(delta)
         renderer.setView(camera)
         val renderStart = System.nanoTime()
         renderer.render()
@@ -161,11 +172,13 @@ class GameScreen(
     override fun hide() {
         prefsJob?.cancel()
         animationTicker.stop()
+        heroTicker.stop()
     }
 
     override fun dispose() {
         prefsJob?.cancel()
         animationTicker.dispose()
+        heroTicker.dispose()
         renderer.dispose()
         spriteBatch.dispose()
     }
@@ -281,6 +294,7 @@ class GameScreen(
         val (x, y) = debugCapture.pinnedCamera ?: return
         camera.position.set(x, y, 0f)
         camera.update()
+        resetHeroes()
     }
 
     private fun showFromRandomPosition(map: GameMap) {
@@ -289,9 +303,31 @@ class GameScreen(
     }
 
     private fun show(map: GameMap) {
+        currentMap?.takeIf { it !== map }?.resetHeroes(false, 0f, 0f, 0f, 0f)
         currentMap = map
         renderer.map = map.tiledMap
+        resetHeroes()
         Gdx.graphics.requestRendering()
+    }
+
+    /** New heroes for the current view, or none when the setting is off. */
+    private fun resetHeroes() {
+        val map = currentMap ?: return
+        map.resetHeroes(heroesEnabled, camera.position.x, camera.position.y, camera.viewportWidth, camera.viewportHeight)
+        Gdx.graphics.requestRendering()
+    }
+
+    private fun updateHeroes(delta: Float) {
+        val map = currentMap
+        if (map == null || !heroesEnabled) {
+            heroTicker.stop()
+            return
+        }
+        map.updateHeroes(delta)
+        when {
+            map.isAnyHeroWalking && !heroTicker.isRunning -> heroTicker.start()
+            !map.isAnyHeroWalking && heroTicker.isRunning -> heroTicker.stop()
+        }
     }
 
     companion object {
@@ -299,6 +335,7 @@ class GameScreen(
         private const val MIN_OBJECT_COVERAGE = 0.8f
         private const val MAX_REROLLS = 20
         private const val MAX_BRIGHT_TERRAIN_SHARE_IN_DARK_MODE = 0.2f
+        private const val HERO_FRAME_TIME = 0.066f
         private val BRIGHT_TERRAINS = setOf(TerrainDef.snowtl.id, TerrainDef.sandtl.id)
     }
 }

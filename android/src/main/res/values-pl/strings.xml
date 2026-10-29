@@ -17,6 +17,8 @@
     <string name="update_interval_24_hours">24 godziny</string>
     <string name="use_scroll_title">Przewijanie mapy</string>
     <string name="use_scroll_summary">Przewijaj mapę podczas przełączania ekranów. Niektóre urządzenia nie obsługują tej funkcji.</string>
+    <string name="wandering_heroes_title">Wędrujący bohaterowie</string>
+    <string name="wandering_heroes_summary">Bohaterowie przemierzają mapę, zbierając skarby i odwiedzając budynki. Zużywa nieco więcej baterii.</string>
     <string name="brightness_title">Jasność</string>
 
     <string name="set_wallpaper_button">Ustaw tapetę</string>

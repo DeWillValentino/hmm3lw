@@ -63,6 +63,10 @@ class SpriteSet(
         return registry.getObjectFrames(defName).orEmptyRegion()
     }
 
+    /** Frames of one group of a multi-group DEF (e.g. a hero facing one way); empty when it isn't loaded. */
+    fun getGroupFrames(defName: String, groupType: Int): Array<TextureAtlas.AtlasRegion> =
+        registry.getObjectFrames("${defName.lowercase().removeSuffix(".def")}@$groupType")
+
     internal fun findAtlasRegions(name: String): Array<TextureAtlas.AtlasRegion> = registry.findRegions(name)
 
     fun paletteTexture(): Texture = registry.paletteTexture

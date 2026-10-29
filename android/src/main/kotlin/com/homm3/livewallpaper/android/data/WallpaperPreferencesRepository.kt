@@ -39,6 +39,8 @@ class WallpaperPreferencesRepository(private val dataStore: DataStore<Preference
 
     suspend fun setBrightness(brightness: Float) = edit { it[Keys.BRIGHTNESS] = brightness }
 
+    suspend fun setWanderingHeroes(enabled: Boolean) = edit { it[Keys.WANDERING_HEROES] = enabled }
+
     private suspend fun edit(transform: (MutablePreferences) -> Unit) {
         dataStore.edit { transform(it) }
     }
@@ -48,6 +50,7 @@ class WallpaperPreferencesRepository(private val dataStore: DataStore<Preference
         mapUpdateInterval = MapUpdateInterval.fromInt(preferences[Keys.MAP_UPDATE_INTERVAL]),
         useScroll = preferences[Keys.USE_SCROLL] ?: WallpaperPreferences.defaultUseScroll,
         brightness = preferences[Keys.BRIGHTNESS] ?: WallpaperPreferences.defaultBrightness,
+        wanderingHeroes = preferences[Keys.WANDERING_HEROES] ?: WallpaperPreferences.defaultWanderingHeroes,
     )
 
     private object Keys {
@@ -55,5 +58,6 @@ class WallpaperPreferencesRepository(private val dataStore: DataStore<Preference
         val SCALE = intPreferencesKey("scale")
         val BRIGHTNESS = floatPreferencesKey("brightness")
         val MAP_UPDATE_INTERVAL = intPreferencesKey("map_update_interval")
+        val WANDERING_HEROES = booleanPreferencesKey("wandering_heroes")
     }
 }

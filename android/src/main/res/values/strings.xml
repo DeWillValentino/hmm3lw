@@ -20,6 +20,8 @@
     <string name="update_interval_24_hours">24 hours</string>
     <string name="use_scroll_title">Scroll map</string>
     <string name="use_scroll_summary">Scroll map while switching screens. Some devices don\'t support this.</string>
+    <string name="wandering_heroes_title">Wandering heroes</string>
+    <string name="wandering_heroes_summary">Heroes roam the map, collecting treasure and visiting buildings. Uses a little more battery.</string>
     <string name="brightness_title">Brightness</string>
 
     <string name="set_wallpaper_button">Set wallpaper</string>

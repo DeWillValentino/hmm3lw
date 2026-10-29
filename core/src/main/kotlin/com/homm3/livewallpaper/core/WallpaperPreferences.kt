@@ -37,11 +37,13 @@ data class WallpaperPreferences(
     val mapUpdateInterval: MapUpdateInterval = defaultMapUpdateInterval,
     val useScroll: Boolean = defaultUseScroll,
     val brightness: Float = defaultBrightness,
+    val wanderingHeroes: Boolean = defaultWanderingHeroes,
 ) {
     companion object Defaults {
         val defaultScale = Scale.X4
         val defaultMapUpdateInterval = MapUpdateInterval.EVERY_SWITCH
         const val defaultUseScroll = true
         const val defaultBrightness = 0.6f
+        const val defaultWanderingHeroes = true
     }
 }

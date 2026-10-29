@@ -17,6 +17,8 @@
     <string name="update_interval_24_hours">24 часа</string>
     <string name="use_scroll_title">Прокрутка карты</string>
     <string name="use_scroll_summary">Передвигать карту при переключении рабочего стола. Не поддерживается на некоторых устройствах.</string>
+    <string name="wandering_heroes_title">Странствующие герои</string>
+    <string name="wandering_heroes_summary">Герои бродят по карте, собирают сокровища и посещают строения. Расходует немного больше заряда.</string>
     <string name="brightness_title">Яркость</string>
 
     <string name="set_wallpaper_button">Установить обои</string>
