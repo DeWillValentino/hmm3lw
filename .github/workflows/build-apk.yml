@@ -35,16 +35,16 @@ jobs:
       - name: Keep the app file with this run
         uses: actions/upload-artifact@v4
         with:
-          name: heroes3-wallpaper-wandering-heroes
+          name: HMM3-Wandering-Heroes-Live-Wallpaper
           path: android/build/outputs/apk/debug/*.apk
 
       - name: Publish it as the "Latest build" release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/build/outputs/apk/debug/*.apk Heroes3-Wallpaper-wandering-heroes.apk
+          cp android/build/outputs/apk/debug/*.apk HMM3-Wandering-Heroes-Live-Wallpaper.apk
           gh release delete latest-build --yes --cleanup-tag || true
-          gh release create latest-build Heroes3-Wallpaper-wandering-heroes.apk \
+          gh release create latest-build HMM3-Wandering-Heroes-Live-Wallpaper.apk \
             --title "Latest build" \
             --notes "Open this page on your phone and tap the .apk file to install. Built from ${GITHUB_SHA::7}."
 
